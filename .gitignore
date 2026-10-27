@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+coverage/
+*.tsbuildinfo
+
+# Environment files: never commit real secrets
+.env
+.env.*
+!.env.example
+
+# Database backups contain customer data: never commit them
+backups/
+*.dump
+
+# Logs and OS files
+*.log
+.DS_Store
+Thumbs.db
