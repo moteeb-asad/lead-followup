@@ -17,7 +17,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run format:check && npm run lint && npm run typecheck"
+    "check": "npm run format:check && npm run lint && npm run typecheck",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
     "prettier": "^3.9.10"

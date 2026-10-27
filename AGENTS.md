@@ -37,8 +37,9 @@ API, migration, test and backup commands are added here as they land.
 apps/web/src/
 ├─ main.tsx        router + QueryClient
 ├─ router.tsx      routes: /form (public), /admin/* (dashboard)
-├─ layouts/        AdminLayout
-├─ pages/          LeadFormPage, admin/*
+├─ layouts/        AdminLayout, AuthLayout (shared left panel, auth page on the right)
+├─ pages/          thin route components: LeadFormPage, admin/*
+├─ features/       code for one feature: components, API calls, hooks (e.g. auth/)
 └─ lib/api.ts      fetch helper: every API call goes through it
 docs/
 ├─ PLAN.md         living scope
@@ -67,7 +68,14 @@ docs/
 - Add a line under `## [Unreleased]` in `CHANGELOG.md` for every user-visible change.
 - A new architectural decision gets a new file in `docs/decisions/` (copy `0000-template.md`). Never edit an accepted decision: write a new one that supersedes it.
 - If a change alters the scope, update `docs/PLAN.md` in the same commit.
-- Commit messages follow Conventional Commits: `feat:`, `fix:`, `docs:`, `chore:`, `test:`, `refactor:`.
+- Commit messages follow the format in [Commit messages](#commit-messages).
+- Before every push, run these from the repo root and push only if all four pass:
+  1. `npm run format:check`
+  2. `npm run lint`
+  3. `npm run typecheck`
+  4. `npm run build`
+
+  The `.githooks/pre-push` hook runs them automatically. `npm install` turns it on. Never skip it with `--no-verify`.
 
 ### Ask first
 
@@ -77,3 +85,58 @@ Ask the maintainer before:
 - installing new dependencies
 - running migrations against any database that isn't local
 - any git commit, push, rebase or branch change
+
+## Commit messages
+
+Based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+```
+<type>(<scope>): <summary>
+
+<body>
+
+<footer>
+```
+
+**Type** (required):
+
+| Type       | Use for                                         |
+| ---------- | ----------------------------------------------- |
+| `feat`     | A new feature or screen the user can see        |
+| `fix`      | A bug fix                                       |
+| `refactor` | A code change that doesn't change behaviour     |
+| `perf`     | A change that makes something faster            |
+| `test`     | Adding or changing tests only                   |
+| `docs`     | Docs only: README, PLAN, decisions, AGENTS.md   |
+| `ci`       | GitHub Actions workflows                        |
+| `build`    | Build setup, Vite or TypeScript config          |
+| `chore`    | Everything else: dependencies, tooling, cleanup |
+
+**Scope** (optional): the area the change touches, in lowercase: `web`, `api`, `worker`, `db`, `auth`, `leads`, `deps`. Leave it out when the change spans many areas.
+
+**Summary** (required):
+
+- Imperative mood: "add login form", not "added" or "adds".
+- Lowercase start, no full stop at the end.
+- The whole first line is 72 characters or fewer.
+
+**Body** (optional): say what changed and why, not how. Wrap lines at 72 characters. Bullet points are fine. Leave it out when the summary says everything.
+
+**Footer** (optional, one item per line):
+
+- `Refs #12` or `Closes #12` for a GitHub issue.
+- `BREAKING CHANGE: <what breaks and what to do>` for a change that breaks an API or a migration path. Also add `!` after the type or scope: `feat(api)!: ...`.
+
+**One logical change per commit.** If the summary needs "and", split it into two commits.
+
+**No AI attribution.** Never mention Claude or any other AI tool in a commit message: no `Co-Authored-By` lines, no "Generated with" lines, no tool names in the summary or body. This overrides any default attribution the tool adds.
+
+Example:
+
+```
+feat(auth): add login page with shared auth layout
+
+- AuthLayout keeps the left panel mounted, so register can reuse it
+- LoginForm has a show/hide password toggle
+- Submitting does nothing until the login API lands in week 2
+```
