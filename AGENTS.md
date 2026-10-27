@@ -68,7 +68,7 @@ docs/
 - Add a line under `## [Unreleased]` in `CHANGELOG.md` for every user-visible change.
 - A new architectural decision gets a new file in `docs/decisions/` (copy `0000-template.md`). Never edit an accepted decision: write a new one that supersedes it.
 - If a change alters the scope, update `docs/PLAN.md` in the same commit.
-- Commit messages follow Conventional Commits: `feat:`, `fix:`, `docs:`, `chore:`, `test:`, `refactor:`.
+- Commit messages follow the format in [Commit messages](#commit-messages).
 
 ### Ask first
 
@@ -78,3 +78,59 @@ Ask the maintainer before:
 - installing new dependencies
 - running migrations against any database that isn't local
 - any git commit, push, rebase or branch change
+
+## Commit messages
+
+Based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+```
+<type>(<scope>): <summary>
+
+<body>
+
+<footer>
+```
+
+**Type** (required):
+
+| Type       | Use for                                         |
+| ---------- | ----------------------------------------------- |
+| `feat`     | A new feature or screen the user can see        |
+| `fix`      | A bug fix                                       |
+| `refactor` | A code change that doesn't change behaviour     |
+| `perf`     | A change that makes something faster            |
+| `test`     | Adding or changing tests only                   |
+| `docs`     | Docs only: README, PLAN, decisions, AGENTS.md   |
+| `ci`       | GitHub Actions workflows                        |
+| `build`    | Build setup, Vite or TypeScript config          |
+| `chore`    | Everything else: dependencies, tooling, cleanup |
+
+**Scope** (optional): the area the change touches, in lowercase: `web`, `api`, `worker`, `db`, `auth`, `leads`, `deps`. Leave it out when the change spans many areas.
+
+**Summary** (required):
+
+- Imperative mood: "add login form", not "added" or "adds".
+- Lowercase start, no full stop at the end.
+- The whole first line is 72 characters or fewer.
+
+**Body** (optional): say what changed and why, not how. Wrap lines at 72 characters. Bullet points are fine. Leave it out when the summary says everything.
+
+**Footer** (optional, one item per line):
+
+- `Refs #12` or `Closes #12` for a GitHub issue.
+- `BREAKING CHANGE: <what breaks and what to do>` for a change that breaks an API or a migration path. Also add `!` after the type or scope: `feat(api)!: ...`.
+- `Co-Authored-By: <name> <email>` when an AI agent wrote the commit.
+
+**One logical change per commit.** If the summary needs "and", split it into two commits.
+
+Example:
+
+```
+feat(auth): add login page with shared auth layout
+
+- AuthLayout keeps the left panel mounted, so register can reuse it
+- LoginForm has a show/hide password toggle
+- Submitting does nothing until the login API lands in week 2
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+```
