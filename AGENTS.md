@@ -69,6 +69,13 @@ docs/
 - A new architectural decision gets a new file in `docs/decisions/` (copy `0000-template.md`). Never edit an accepted decision: write a new one that supersedes it.
 - If a change alters the scope, update `docs/PLAN.md` in the same commit.
 - Commit messages follow the format in [Commit messages](#commit-messages).
+- Before every push, run these from the repo root and push only if all four pass:
+  1. `npm run format:check`
+  2. `npm run lint`
+  3. `npm run typecheck`
+  4. `npm run build`
+
+  The `.githooks/pre-push` hook runs them automatically. `npm install` turns it on. Never skip it with `--no-verify`.
 
 ### Ask first
 
