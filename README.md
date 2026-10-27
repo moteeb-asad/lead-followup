@@ -31,6 +31,18 @@ What this app does about it:
 3. A background worker sends the email and retries up to 3 times if it fails.
 4. The dashboard shows every lead and its timeline.
 
+## Screenshots
+
+<p align="left">
+  <img src="docs/screenshots/lead-form.png" alt="Public lead form" width="49%" />
+  <img src="docs/screenshots/login.png" alt="Admin login" width="49%" />
+</p>
+
+<p align="left">
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="49%" />
+  <img src="docs/screenshots/leads.png" alt="Leads table" width="49%" />
+</p>
+
 ## Stack
 
 - **Frontend:** React, Vite, TypeScript, Tailwind CSS, React Router, TanStack Query
