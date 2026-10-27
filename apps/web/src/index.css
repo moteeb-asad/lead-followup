@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+/* Add to apps/web/src/index.css, right after @import "tailwindcss"; */
+@theme block into apps/web/src/index.css. */
+@theme {
+  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-paper: #ecece7;
+  --color-paper-2: #e3e4de;
+  --color-card: #fbfbf8;
+  --color-ink: #111412;
+  --color-ink-soft: #1d2420;
+  --color-ink-2: #3f4541;
+  --color-muted: #5e645f;
+  --color-line: #c9cbc4;
+  --color-fog: #a9afaa;
+  --color-signal: #c6f432;
+  --color-signal-soft: #eefbc4;
+  --color-cobalt: #1f4fd8;
+  --color-cobalt-soft: #e1e8fb;
+  --color-alert: #b93b0a;
+  --color-alert-soft: #fce4d8;
+  --color-alert-bright: #ff8a4c;
+
+  --text-label: 11px;
+  --text-label--line-height: 16px;
+  --text-label--letter-spacing: 0.08em;
+
+  --shadow-hard: 3px 3px 0 0 #111412;
+  --shadow-hard-lg: 6px 6px 0 0 #111412;
+}

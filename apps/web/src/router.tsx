@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import AdminLayout from "./layouts/AdminLayout";
+import AuthLayout from "./layouts/AuthLayout";
 import DashboardPage from "./pages/admin/DashboardPage";
 import LeadDetailPage from "./pages/admin/LeadDetailPage";
 import LeadsPage from "./pages/admin/LeadsPage";
@@ -12,7 +13,10 @@ import NotFoundPage from "./pages/NotFoundPage";
 export const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/form" replace /> },
   { path: "/form", element: <LeadFormPage /> },
-  { path: "/admin/login", element: <LoginPage /> },
+  {
+    element: <AuthLayout />,
+    children: [{ path: "/admin/login", element: <LoginPage /> }],
+  },
   {
     path: "/admin",
     element: <AdminLayout />,

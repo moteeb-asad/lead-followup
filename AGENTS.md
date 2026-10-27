@@ -37,8 +37,9 @@ API, migration, test and backup commands are added here as they land.
 apps/web/src/
 ├─ main.tsx        router + QueryClient
 ├─ router.tsx      routes: /form (public), /admin/* (dashboard)
-├─ layouts/        AdminLayout
-├─ pages/          LeadFormPage, admin/*
+├─ layouts/        AdminLayout, AuthLayout (shared left panel, auth page on the right)
+├─ pages/          thin route components: LeadFormPage, admin/*
+├─ features/       code for one feature: components, API calls, hooks (e.g. auth/)
 └─ lib/api.ts      fetch helper: every API call goes through it
 docs/
 ├─ PLAN.md         living scope
