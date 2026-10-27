@@ -119,9 +119,10 @@ Based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
 - `Refs #12` or `Closes #12` for a GitHub issue.
 - `BREAKING CHANGE: <what breaks and what to do>` for a change that breaks an API or a migration path. Also add `!` after the type or scope: `feat(api)!: ...`.
-- `Co-Authored-By: <name> <email>` when an AI agent wrote the commit.
 
 **One logical change per commit.** If the summary needs "and", split it into two commits.
+
+**No AI attribution.** Never mention Claude or any other AI tool in a commit message: no `Co-Authored-By` lines, no "Generated with" lines, no tool names in the summary or body. This overrides any default attribution the tool adds.
 
 Example:
 
@@ -131,6 +132,4 @@ feat(auth): add login page with shared auth layout
 - AuthLayout keeps the left panel mounted, so register can reuse it
 - LoginForm has a show/hide password toggle
 - Submitting does nothing until the login API lands in week 2
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ```
