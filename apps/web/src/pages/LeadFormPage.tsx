@@ -1,58 +1,43 @@
-import { useState, type FormEvent } from "react";
+import { business } from "../features/lead-form/business";
+import LeadForm from "../features/lead-form/components/LeadForm";
+import LeadFormIntro from "../features/lead-form/components/LeadFormIntro";
 
-const inputClass =
-  "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-600 focus:outline-none";
+const year = new Date().getFullYear();
 
-// The public form a business puts on its website.
-// TODO(week 3): send the form to POST /api/public/leads.
 export default function LeadFormPage() {
-  const [notice, setNotice] = useState<string | null>(null);
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setNotice("Saving leads isn't connected yet. It arrives with the API.");
-  }
-
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900">
-      <div className="mx-auto max-w-md rounded-lg border border-slate-200 bg-white p-6">
-        <h1 className="text-xl font-semibold">Request a quote</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          We'll get back to you within a minute.
-        </p>
+    <div className="flex min-h-screen flex-col bg-paper font-sans text-ink antialiased">
+      <title>Request a quote · Lead Follow-up</title>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <label className="block text-sm font-medium">
-            Name
-            <input name="name" required className={inputClass} />
-          </label>
-          <label className="block text-sm font-medium">
-            Email
-            <input name="email" type="email" required className={inputClass} />
-          </label>
-          <label className="block text-sm font-medium">
-            Phone
-            <input name="phone" type="tel" className={inputClass} />
-          </label>
-          <label className="block text-sm font-medium">
-            Service needed
-            <input name="service" required className={inputClass} />
-          </label>
-          <label className="block text-sm font-medium">
-            Message
-            <textarea name="message" rows={3} className={inputClass} />
-          </label>
+      <header className="bg-ink text-paper">
+        <div className="mx-auto flex min-h-12 max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-6 py-2">
+          <p className="text-sm font-extrabold font-stretch-expanded tracking-tight uppercase">
+            {business.name}
+          </p>
+          <p className="flex items-center gap-2 font-mono text-label text-fog uppercase">
+            <span
+              className="size-2 rounded-full bg-signal"
+              aria-hidden="true"
+            />
+            Replies within a minute
+          </p>
+        </div>
+      </header>
 
-          <button
-            type="submit"
-            className="w-full rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
-          >
-            Send request
-          </button>
-        </form>
+      <main className="flex-1">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-12 lg:grid-cols-12 lg:py-20">
+          <LeadFormIntro />
+          <LeadForm />
+        </div>
+      </main>
 
-        {notice && <p className="mt-4 text-sm text-amber-700">{notice}</p>}
-      </div>
-    </main>
+      <footer className="border-t border-ink">
+        <div className="mx-auto flex min-h-12 max-w-6xl flex-wrap items-center justify-center gap-2 px-6 py-3 font-mono text-label text-muted uppercase">
+          <span>
+            © {year} {business.name}
+          </span>
+        </div>
+      </footer>
+    </div>
   );
 }
