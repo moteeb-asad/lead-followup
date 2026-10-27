@@ -26,11 +26,12 @@ Run from the repo root.
 | -------------------------------- | --------------------------------------------------------------- |
 | `npm install`                    | Installs every workspace                                        |
 | `npm run dev:web`                | Starts the web app on http://localhost:5173                     |
+| `npm run dev:api`                | Starts the API on http://localhost:4000                         |
 | `npm run check`                  | Runs the format check, lint and type check                      |
 | `npm run build`                  | Builds every workspace                                          |
 | `npm run db:migrate -w apps/api` | Applies new migrations to `DATABASE_URL` (from `apps/api/.env`) |
 
-API, test and backup commands are added here as they land.
+Test and backup commands are added here as they land.
 
 ## Layout
 
