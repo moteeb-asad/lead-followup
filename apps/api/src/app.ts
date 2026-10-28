@@ -1,6 +1,6 @@
 import cookieParser from "cookie-parser";
 import express, { type ErrorRequestHandler } from "express";
-import { authRouter } from "./features/auth/auth.routes.ts";
+import { authRouter, meRouter } from "./features/auth/auth.routes.ts";
 import { healthRouter } from "./features/health/health.routes.ts";
 
 export function createApp() {
@@ -11,6 +11,7 @@ export function createApp() {
 
   app.use("/api/health", healthRouter);
   app.use("/api/auth", authRouter);
+  app.use("/api/me", meRouter);
 
   // Any /api route that didn't match above
   app.use("/api", (_req, res) => {

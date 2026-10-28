@@ -8,6 +8,7 @@ import {
   sessionCookieOptions,
 } from "../../lib/session-cookie.ts";
 import { loginLimiter } from "../../middleware/rate-limit.ts";
+import { requireAuth } from "../../middleware/require-auth.ts";
 import { validate } from "../../middleware/validate.ts";
 import {
   createSession,
@@ -61,4 +62,12 @@ authRouter.post("/logout", async (req, res) => {
   }
   res.clearCookie(SESSION_COOKIE, sessionCookieOptions);
   res.status(204).end();
+});
+
+// GET /api/me: the logged-in user, or 401. Mounted at /api/me in app.ts, the
+// path in PLAN.md that the web app uses to check the session.
+export const meRouter = Router();
+
+meRouter.get("/", requireAuth, (_req, res) => {
+  res.json(res.locals.user);
 });
