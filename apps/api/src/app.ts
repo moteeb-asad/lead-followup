@@ -1,5 +1,5 @@
 import express, { type ErrorRequestHandler } from "express";
-import { healthRouter } from "./routes/health.ts";
+import { healthRouter } from "./features/health/health.routes.ts";
 
 export function createApp() {
   const app = express();

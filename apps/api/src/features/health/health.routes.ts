@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { pool } from "../db.ts";
+import { pool } from "../../db.ts";
 
 export const healthRouter = Router();
 
