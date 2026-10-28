@@ -22,14 +22,17 @@ Read the plan and the decisions before proposing structural changes.
 
 Run from the repo root.
 
-| Command           | What it does                                |
-| ----------------- | ------------------------------------------- |
-| `npm install`     | Installs every workspace                    |
-| `npm run dev:web` | Starts the web app on http://localhost:5173 |
-| `npm run check`   | Runs the format check, lint and type check  |
-| `npm run build`   | Builds every workspace                      |
+| Command                           | What it does                                                                      |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| `npm install`                     | Installs every workspace                                                          |
+| `npm run dev:web`                 | Starts the web app on http://localhost:5173                                       |
+| `npm run dev:api`                 | Starts the API on http://localhost:4000                                           |
+| `npm run check`                   | Runs the format check, lint and type check                                        |
+| `npm run build`                   | Builds every workspace                                                            |
+| `npm run db:migrate -w apps/api`  | Applies new migrations to `DATABASE_URL` (from `apps/api/.env`)                   |
+| `npm run user:create -w apps/api` | Creates the admin user from `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `apps/api/.env` |
 
-API, migration, test and backup commands are added here as they land.
+Test and backup commands are added here as they land.
 
 ## Layout
 
