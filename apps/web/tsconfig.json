@@ -1,15 +1,7 @@
 {
-  "compilerOptions": {
-    "composite": true,
-    "tsBuildInfoFile": "./node_modules/.dotfiles/.tsconfig.app.tsbuildinfo",
-
-    // 👇 Ensure these three lines are together inside compilerOptions
-    "jsx": "react-jsx",
-
-    "types": ["vite/client"],
-    "paths": {
-      "@/*": ["./*"]
-    }
-  },
-  "include": ["src"]
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
 }

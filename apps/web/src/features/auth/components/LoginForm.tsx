@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   loginSchema,
   type LoginInput,
-} from "@/src/features/auth/validators/auth.schema";
+} from "@/features/auth/validators/auth.schema";
 
 const labelClass =
   "flex items-baseline gap-3 font-mono text-label text-muted uppercase";

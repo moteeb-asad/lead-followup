@@ -1,15 +1,16 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import path from "path"; // 1. Added for path resolution
+import path from "node:path";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      // 2. Maps the '@/' path to your 'apps/web/' root folder
-      "@": path.resolve(__dirname, "./"),
+      // "@/features/..." means "src/features/...". Keep in step with the
+      // paths entry in tsconfig.app.json.
+      "@": path.resolve(import.meta.dirname, "src"),
     },
   },
   server: {
