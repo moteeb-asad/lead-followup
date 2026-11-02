@@ -19,3 +19,6 @@ backups/
 *.log
 .DS_Store
 Thumbs.db
+
+apps/web/src/**/*.js
+apps/web/src/**/*.d.ts
