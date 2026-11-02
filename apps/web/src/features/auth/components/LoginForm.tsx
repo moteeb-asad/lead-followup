@@ -1,83 +1,70 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useActionState, useTransition } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router";
+import { useLogin } from "@/features/auth/hooks/useAuth";
 import {
   loginSchema,
   type LoginInput,
 } from "@/features/auth/validators/auth.schema";
+import { ApiError } from "@/lib/api";
 
 const labelClass =
   "flex items-baseline gap-3 font-mono text-label text-muted uppercase";
 const inputClass =
-  "h-11 border border-ink bg-card px-3 text-base focus:outline-2 focus:outline-offset-2 focus:outline-cobalt";
+  "h-11 border border-ink bg-card px-3 text-base placeholder:text-muted focus:outline-2 focus:outline-offset-2 focus:outline-cobalt";
 
-// 1. Define the asynchronous login action that communicates with Express
-async function loginAction(prevState: any, formData: FormData) {
-  try {
-    const email = formData.get("email");
-    const password = formData.get("password");
-
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      return { error: data.error || "Invalid email or password" };
-    }
-
-    const user = await response.json();
-
-    // Redirect on success
-    window.location.href = "/admin";
-    return { error: null, success: true, user };
-  } catch (err) {
-    console.log(err);
-    return { error: "Network error. Please try again later." };
-  }
+// 4xx errors carry a message written for the user ("Email or password is
+// wrong", "Too many login attempts..."). Anything else gets a generic one.
+function loginErrorMessage(error: Error | null) {
+  if (!error) return undefined;
+  if (error instanceof ApiError && error.status < 500) return error.message;
+  return "Couldn't log in. Try again in a moment.";
 }
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [state, formAction] = useActionState(loginAction, undefined);
-  const [_isPending, startTransition] = useTransition();
-
+  const navigate = useNavigate();
+  const login = useLogin();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-  });
+  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+
+  const error =
+    errors.email?.message ??
+    errors.password?.message ??
+    loginErrorMessage(login.error);
 
   return (
     <>
-      {(state?.error || errors.email || errors.password) && (
-        <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-danger/20 bg-danger/10 p-3">
-          <span className="material-symbols-outlined !text-[20px] text-danger">
-            error
-          </span>
-          <div className="text-sm text-danger font-medium">
-            {state?.error || errors.email?.message || errors.password?.message}
-          </div>
+      {error && (
+        <div
+          role="alert"
+          className="mt-8 flex items-start gap-3 border-2 border-alert bg-alert-soft px-4 py-3 text-alert"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.25"
+            className="mt-0.5 size-4 shrink-0"
+            aria-hidden="true"
+          >
+            <path d="M12 4 21 20H3zM12 10v4M12 17v.5" />
+          </svg>
+          <p className="text-sm font-medium">{error}</p>
         </div>
       )}
       <form
-        className="mt-8 flex flex-col gap-5 border-2 border-ink bg-card p-6 shadow-hard-lg sm:p-8"
-        onSubmit={handleSubmit((data) => {
-          const formData = new FormData();
-          formData.append("email", data.email);
-          formData.append("password", data.password);
-
-          startTransition(() => {
-            formAction(formData);
-          });
-        })}
+        noValidate
+        className={`${error ? "mt-4" : "mt-8"} flex flex-col gap-5 border-2 border-ink bg-card p-6 shadow-hard-lg sm:p-8`}
+        onSubmit={handleSubmit((data) =>
+          login.mutate(data, {
+            onSuccess: () => navigate("/admin", { replace: true }),
+          }),
+        )}
       >
         <div className="flex flex-col gap-2">
           <label htmlFor="login-email" className={labelClass}>
@@ -88,6 +75,7 @@ export default function LoginForm() {
             type="email"
             placeholder="name@company.com"
             autoComplete="username"
+            aria-invalid={errors.email ? true : undefined}
             className={`${inputClass} w-full`}
             {...register("email")}
           />
@@ -102,6 +90,7 @@ export default function LoginForm() {
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               placeholder="••••••••"
+              aria-invalid={errors.password ? true : undefined}
               className={`${inputClass} min-w-0 flex-1 border-r-0`}
               {...register("password")}
             />
@@ -118,9 +107,10 @@ export default function LoginForm() {
         </div>
         <button
           type="submit"
-          className="mt-2 inline-flex h-11 w-full items-center justify-center gap-2 border-2 border-ink bg-signal px-6 font-bold text-ink shadow-hard hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cobalt"
+          disabled={login.isPending}
+          className="mt-2 inline-flex h-11 w-full items-center justify-center gap-2 border-2 border-ink bg-signal px-6 font-bold text-ink shadow-hard hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cobalt disabled:pointer-events-none disabled:opacity-60"
         >
-          Log in
+          {login.isPending ? "Logging in…" : "Log in"}
           <svg
             viewBox="0 0 24 24"
             fill="none"
