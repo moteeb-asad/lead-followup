@@ -13,7 +13,14 @@ const links = [
     end: false,
     icon: "M4 13 6.5 5h11L20 13v6H4zM4 13h5l1 2h4l1-2h5",
   },
-  // TODO(week 5): Templates and Settings, once those pages exist.
+  {
+    to: "/admin/settings",
+    label: "Settings",
+    end: false,
+    icon: "M4 7h9M17 7h3M4 17h3M11 17h9M13 5h4v4h-4zM7 15h4v4H7z",
+  },
+  // TODO(week 5): a Templates link, if templates get their own page. For now
+  // they live in the Templates panel on the settings page.
 ];
 
 const linkClass =

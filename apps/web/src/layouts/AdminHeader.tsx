@@ -9,6 +9,7 @@ function crumbsFor(pathname: string): Crumb[] {
   if (leadId)
     return [{ label: "Leads", to: "/admin/leads" }, { label: leadId }];
   if (pathname.startsWith("/admin/leads")) return [{ label: "Leads" }];
+  if (pathname.startsWith("/admin/settings")) return [{ label: "Settings" }];
   return [{ label: "Overview" }];
 }
 
