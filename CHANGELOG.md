@@ -15,3 +15,4 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Login page design: a split screen with the product panel on the left and the login form on the right, with a show/hide password toggle.
 - Lead form design: a "request a quote" page with a three-step intro, the form styled as a ticket, service choice buttons and a hidden honeypot field.
 - Admin login: the login form signs in through the API and shows its errors, the admin area sends anyone without a session to the login page, and a Log out button ends the session.
+- Dashboard design: key numbers, a leads-per-day chart, the outbox panel and recent leads, showing sample data until the stats API exists.
