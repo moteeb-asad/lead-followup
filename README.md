@@ -31,12 +31,33 @@ What this app does about it:
 3. A background worker sends the email and retries up to 3 times if it fails.
 4. The dashboard shows every lead and its timeline.
 
+## Planned: urgent leads first
+
+Replying in a minute is automatic. Deciding who to ring back is not, and the leads table sorts by arrival time, so a burst boiler and a bathroom enquiry for next spring look the same in the list.
+
+The next feature classifies each new lead by urgency and job type and sorts the list by it. It runs as a queued job on the same worker as email, so if it is unavailable the lead still lands and the auto-reply still goes out, just without a label. Nothing it produces is sent to a customer.
+
+See [decision 0007](docs/decisions/0007-llm-lead-triage.md).
+
+## Screenshots
+
+<p align="left">
+  <img src="docs/screenshots/lead-form.png" alt="Public lead form" width="49%" />
+  <img src="docs/screenshots/login.png" alt="Admin login" width="49%" />
+</p>
+
+<p align="left">
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="49%" />
+  <img src="docs/screenshots/leads.png" alt="Leads table" width="49%" />
+</p>
+
 ## Stack
 
 - **Frontend:** React, Vite, TypeScript, Tailwind CSS, React Router, TanStack Query
 - **API:** Express 5, TypeScript, Zod (in progress)
 - **Database:** PostgreSQL with plain SQL and versioned migrations (in progress)
 - **Worker:** Node process that sends from the outbox with retries (in progress)
+- **Triage:** LLM classification of new leads, run as a queued job on the worker (planned)
 
 ## Run locally
 

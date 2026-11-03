@@ -31,15 +31,15 @@ A small app that replies to new leads automatically and shows each lead's histor
 
 ## Database tables (v1)
 
-| Table          | Key columns                                                                                                                                                      | Notes                                                                              |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `users`        | id, email, password_hash, created_at                                                                                                                             | One admin login in v1                                                              |
-| `sessions`     | id, user_id, expires_at                                                                                                                                          | The httpOnly cookie holds the session id                                           |
-| `leads`        | id, name, email, phone, service, message, source (form, webhook), external_id, status (new, contacted, won, lost), created_at                                    | Unique on (source, external_id), so a retried webhook doesn't create a second lead |
-| `templates`    | id, name, subject, body                                                                                                                                          | Body uses `{name}` and `{service}` placeholders                                    |
-| `automations`  | id, trigger, delay_days, template_id, active                                                                                                                     | One rule in v1: new lead → send template                                           |
-| `messages`     | id, lead_id, template_id, channel, to_address, subject, body, status (queued, sending, sent, failed), attempts, next_attempt_at, last_error, sent_at, created_at | The outbox the worker reads                                                        |
-| `activity_log` | id, lead_id, type, details (jsonb), created_at                                                                                                                   | Feeds the lead timeline                                                            |
+| Table          | Key columns                                                                                                                                                      | Notes                                                                                    |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `users`        | id, email, password_hash, created_at                                                                                                                             | One admin login in v1                                                                    |
+| `sessions`     | token_hash, user_id, created_at, expires_at                                                                                                                      | The httpOnly cookie holds a random token; the table stores only its hash (decision 0006) |
+| `leads`        | id, name, email, phone, service, message, source (form, webhook), external_id, status (new, contacted, won, lost), created_at                                    | Unique on (source, external_id), so a retried webhook doesn't create a second lead       |
+| `templates`    | id, name, subject, body                                                                                                                                          | Body uses `{name}` and `{service}` placeholders                                          |
+| `automations`  | id, trigger, delay_days, template_id, active                                                                                                                     | One rule in v1: new lead → send template                                                 |
+| `messages`     | id, lead_id, template_id, channel, to_address, subject, body, status (queued, sending, sent, failed), attempts, next_attempt_at, last_error, sent_at, created_at | The outbox the worker reads                                                              |
+| `activity_log` | id, lead_id, type, details (jsonb), created_at                                                                                                                   | Feeds the lead timeline                                                                  |
 
 ## API routes (v1)
 
@@ -98,5 +98,5 @@ A small app that replies to new leads automatically and shows each lead's histor
 ## Open questions
 
 - [ ] Migrations: `node-pg-migrate`, or numbered `.sql` files with a small runner script? (week 1)
-- [ ] Sessions: `express-session` with a Postgres store, or my own `sessions` table and middleware? (week 2)
+- [x] Sessions: my own `sessions` table and middleware. See [decision 0006](decisions/0006-own-sessions-table.md).
 - [ ] Email for testing: Resend test mode, or Mailtrap? (week 3)

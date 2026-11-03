@@ -1,9 +1,13 @@
-import { Outlet } from "react-router";
+import { Navigate, Outlet } from "react-router";
 import FlowBoard from "../features/auth/components/FlowBoard";
+import { useMe } from "../features/auth/hooks/useAuth";
 
 // The left panel stays mounted while the right side switches between auth
-// pages (login now, register later).
+// pages (login now, register later). Someone already logged in goes to /admin.
 export default function AuthLayout() {
+  const me = useMe();
+  if (me.data) return <Navigate to="/admin" replace />;
+
   return (
     <div className="flex min-h-screen flex-wrap bg-paper font-sans text-ink antialiased">
       <FlowBoard />

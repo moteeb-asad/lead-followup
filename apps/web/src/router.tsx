@@ -5,6 +5,7 @@ import DashboardPage from "./pages/admin/DashboardPage";
 import LeadDetailPage from "./pages/admin/LeadDetailPage";
 import LeadsPage from "./pages/admin/LeadsPage";
 import LoginPage from "./pages/admin/LoginPage";
+import SettingsPage from "./pages/admin/SettingsPage";
 import LeadFormPage from "./pages/LeadFormPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
       { index: true, element: <DashboardPage /> },
       { path: "leads", element: <LeadsPage /> },
       { path: "leads/:leadId", element: <LeadDetailPage /> },
+      { path: "settings", element: <SettingsPage /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },
