@@ -17,3 +17,4 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Admin login: the login form signs in through the API and shows its errors, the admin area sends anyone without a session to the login page, and a Log out button ends the session.
 - Admin shell design: a dark sidebar with Dashboard and Leads links, and a header with the breadcrumb, a search box, the signed-in email and Log out.
 - Dashboard design: key numbers, a leads-per-day chart, the outbox panel and recent leads, showing sample data until the stats API exists.
+- Leads list design: status and source filters, a table with status and auto-reply badges, and pagination, showing sample data until the leads API exists.

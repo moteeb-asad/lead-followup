@@ -1,6 +1,12 @@
 import { Link } from "react-router";
-
-type Reply = "queued" | "sent" | "failed";
+import LeadStatusBadge from "@/features/leads/components/LeadStatusBadge";
+import ReplyStatus from "@/features/leads/components/ReplyStatus";
+import SourceBadge from "@/features/leads/components/SourceBadge";
+import type {
+  LeadSource,
+  LeadStatus,
+  ReplyState,
+} from "@/features/leads/types";
 
 // Static sample data from the design.
 const leads: {
@@ -9,63 +15,63 @@ const leads: {
   name: string;
   email: string;
   service: string;
-  source: string;
-  status: "New" | "Contacted";
-  reply: Reply;
+  source: LeadSource;
+  status: LeadStatus;
+  reply: ReplyState;
   replyText: string;
 }[] = [
   {
-    id: "1",
+    id: "L-1048",
     time: "14:19",
     name: "Omar Sheikh",
     email: "omar.sheikh@example.com",
     service: "Blocked drain",
-    source: "Webhook",
-    status: "New",
+    source: "webhook",
+    status: "new",
     reply: "queued",
     replyText: "Queued",
   },
   {
-    id: "2",
+    id: "L-1047",
     time: "13:04",
     name: "Emma Ross",
     email: "emma.ross@example.com",
     service: "Radiators",
-    source: "Form",
-    status: "New",
+    source: "form",
+    status: "new",
     reply: "sent",
     replyText: "Sent · 44s",
   },
   {
-    id: "3",
+    id: "L-1046",
     time: "10:02",
     name: "Sara Khan",
     email: "sara.khan@example.com",
     service: "Boiler repair",
-    source: "Form",
-    status: "Contacted",
+    source: "form",
+    status: "contacted",
     reply: "sent",
     replyText: "Sent · 37s",
   },
   {
-    id: "4",
+    id: "L-1045",
     time: "09:38",
     name: "Ali Raza",
     email: "ali.raza@example.com",
     service: "Leak",
-    source: "Form",
-    status: "New",
+    source: "form",
+    status: "new",
     reply: "failed",
     replyText: "Failed · 3/3",
   },
   {
-    id: "5",
+    id: "L-1044",
     time: "08:51",
     name: "James Lee",
     email: "james.lee@example.com",
     service: "Leak",
-    source: "Webhook",
-    status: "Contacted",
+    source: "webhook",
+    status: "contacted",
     reply: "sent",
     replyText: "Sent · 42s",
   },
@@ -85,58 +91,6 @@ function ArrowIcon({ className }: { className: string }) {
       <path d="M4 12h15" />
       <path d="M13 6l6 6-6 6" />
     </svg>
-  );
-}
-
-function ReplyStatus({ reply, text }: { reply: Reply; text: string }) {
-  if (reply === "failed") {
-    return (
-      <span className="hidden lg:block">
-        <span className="inline-flex h-6 items-center gap-1.5 bg-alert-soft px-2 font-mono text-label text-alert uppercase">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.25"
-            className="size-3"
-            aria-hidden="true"
-          >
-            <path d="M12 4 21 20H3zM12 10v4M12 17v.5" />
-          </svg>
-          {text}
-        </span>
-      </span>
-    );
-  }
-
-  return (
-    <span className="hidden items-center gap-1.5 font-mono text-xs text-ink-2 lg:inline-flex">
-      {reply === "queued" ? (
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="size-3.5"
-          aria-hidden="true"
-        >
-          <path d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zM12 7v5l3 2" />
-        </svg>
-      ) : (
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.25"
-          strokeLinecap="square"
-          className="size-3.5"
-          aria-hidden="true"
-        >
-          <path d="M5 12.5 10 17l9-10" />
-        </svg>
-      )}
-      {text}
-    </span>
   );
 }
 
@@ -183,24 +137,14 @@ export default function RecentLeads() {
                 {lead.service}
               </span>
               <span className="hidden lg:block">
-                <span className="inline-flex h-6 items-center border border-line px-2 font-mono text-label text-ink-2 uppercase">
-                  {lead.source}
-                </span>
+                <SourceBadge source={lead.source} />
               </span>
               <span>
-                {lead.status === "New" ? (
-                  <span className="inline-flex h-6 items-center gap-1.5 bg-signal px-2 font-mono text-label text-ink uppercase">
-                    <span className="size-1.5 bg-ink" aria-hidden="true" />
-                    New
-                  </span>
-                ) : (
-                  <span className="inline-flex h-6 items-center gap-1.5 bg-cobalt-soft px-2 font-mono text-label text-cobalt uppercase">
-                    <span className="size-1.5 bg-cobalt" aria-hidden="true" />
-                    Contacted
-                  </span>
-                )}
+                <LeadStatusBadge status={lead.status} />
               </span>
-              <ReplyStatus reply={lead.reply} text={lead.replyText} />
+              <span className="hidden lg:block">
+                <ReplyStatus state={lead.reply} text={lead.replyText} />
+              </span>
               <ArrowIcon className="hidden size-4 lg:block" />
             </Link>
           </li>
