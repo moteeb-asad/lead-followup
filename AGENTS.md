@@ -152,7 +152,7 @@ Check every change against these five areas before calling it done.
 **5. Dependencies and deployment**
 
 - Run `npm audit` before every release and after adding a dependency, and fix high and critical findings. Check `npm outdated` regularly.
-- GitHub watches the repo too: Dependabot opens weekly update PRs into `develop` and security fixes as soon as an advisory lands, secret scanning blocks pushes that contain a known secret format, and CodeQL scans the code. Review a Dependabot PR like any other: read the changelog of a major update before merging it.
+- GitHub watches the repo too: Dependabot opens monthly update PRs (on the 28th) into `develop` and security fixes as soon as an advisory lands, secret scanning blocks pushes that contain a known secret format, and CodeQL scans the code. Review a Dependabot PR like any other: read the changelog of a major update before merging it.
 - No debug or test-only endpoints in production, and no stack traces in responses (the error handler returns `{ error }` only).
 - No CORS by default: in development the web app and the API share one origin through the Vite proxy, and in production Nginx serves both. If CORS is ever needed, allow named origins only, never `*` together with credentials.
 - `x-powered-by` stays disabled. Add security headers before deploying.
