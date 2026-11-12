@@ -1,0 +1,27 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "oxc", "node"],
+  "env": { "node": true },
+  "rules": {
+    "typescript/no-explicit-any": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-script-url": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "child_process",
+            "message": "The API doesn't run shell commands. Ask the maintainer first."
+          },
+          {
+            "name": "node:child_process",
+            "message": "The API doesn't run shell commands. Ask the maintainer first."
+          }
+        ]
+      }
+    ]
+  }
+}
