@@ -90,12 +90,33 @@ docs/
 ### Code
 
 - TypeScript strict. No `any`: use `unknown` and narrow it.
-- Every API call from the web app goes through `src/lib/api.ts`.
 - Server data in the web app uses TanStack Query, not `useEffect` fetching.
 - Every API route validates its input with zod.
 - Database access is plain SQL through `pg` with parameters (`$1`, `$2`). Never build SQL by joining strings. No ORM.
 - Schema changes only through a new numbered migration. Never edit a migration that has already run.
 - The API never sends email directly. It writes to the `messages` outbox, and the worker sends.
+
+### Web app layers
+
+Data flows one way. Each layer only uses the one below it:
+
+```
+src/lib/api.ts         the only code that calls fetch
+features/*/api.ts      one function per endpoint, using api()
+features/*/hooks/      TanStack Query hooks around those functions
+components, pages, layouts   use hooks, never the layers below
+```
+
+- **The web app never talks to the database.** It can't import `pg` or any code from `apps/api`. All data goes through an `/api` endpoint.
+- **No `fetch`, `axios` or `XMLHttpRequest` in UI.** Only `src/lib/api.ts` calls `fetch`.
+- **No business logic in UI.** Components show data and send the user's actions to a hook. Decisions such as which status changes are allowed, when to retry, or what counts as a duplicate are made in the API, which is the only place they can be trusted. The UI may repeat a check for fast feedback (form validation), but the API's check is the one that counts. Display-only helpers (formatting a date, picking a badge colour) are fine in `features/*/`.
+
+`.oxlintrc.json` in each app enforces these. `npm run lint` fails on:
+
+- **web:** `fetch` or `XMLHttpRequest` outside `src/lib/api.ts`; `axios`, `pg` or `apps/api` imports; `api()` outside `features/*/api.ts`; components, pages or layouts importing a `features/*/api` module; `any`; `eval` and `new Function`; `dangerouslySetInnerHTML`; `javascript:` URLs; `target="_blank"` without `rel="noreferrer"`
+- **api:** `any`; `eval` and `new Function`; `child_process`
+
+Don't turn a rule off or add a disable comment to get past it. If a rule seems wrong, ask the maintainer.
 
 ### Security
 
@@ -131,6 +152,7 @@ Check every change against these five areas before calling it done.
 **5. Dependencies and deployment**
 
 - Run `npm audit` before every release and after adding a dependency, and fix high and critical findings. Check `npm outdated` regularly.
+- GitHub watches the repo too: Dependabot opens weekly update PRs into `develop` and security fixes as soon as an advisory lands, secret scanning blocks pushes that contain a known secret format, and CodeQL scans the code. Review a Dependabot PR like any other: read the changelog of a major update before merging it.
 - No debug or test-only endpoints in production, and no stack traces in responses (the error handler returns `{ error }` only).
 - No CORS by default: in development the web app and the API share one origin through the Vite proxy, and in production Nginx serves both. If CORS is ever needed, allow named origins only, never `*` together with credentials.
 - `x-powered-by` stays disabled. Add security headers before deploying.
