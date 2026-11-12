@@ -180,6 +180,16 @@ Ask the maintainer before:
 - running migrations against any database that isn't local
 - any git commit, push, rebase or branch change
 
+### Review before commit
+
+Never commit on your own. The maintainer reviews the changed files first.
+
+1. Make the change and leave it uncommitted.
+2. List the files you changed and the commit message you propose.
+3. Wait for an explicit yes ("commit", "go ahead") before running `git commit`.
+
+Ask every time. A yes covers only the commit it was given for: not later commits, and not a push. A request to build or fix something is not a request to commit it.
+
 ## Commit messages
 
 Based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
