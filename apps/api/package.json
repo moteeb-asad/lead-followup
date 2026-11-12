@@ -7,7 +7,8 @@
     "dev": "node --watch --env-file=.env src/index.ts",
     "db:migrate": "node --env-file=.env scripts/migrate.ts",
     "user:create": "node --env-file=.env scripts/create-user.ts",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "lint": "oxlint"
   },
   "dependencies": {
     "argon2": "^0.45.1",
@@ -22,6 +23,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^24.19.2",
     "@types/pg": "^8.23.1",
+    "oxlint": "^1.88.0",
     "typescript": "^6.0.3"
   }
 }
