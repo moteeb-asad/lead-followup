@@ -1,8 +1,150 @@
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "oxc"],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+
+    "typescript/no-explicit-any": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-script-url": "error",
+    "react/no-danger": "error",
+    "react/jsx-no-script-url": "error",
+    "react/jsx-no-target-blank": "error",
+
+    // Layering: lib/api.ts → features/*/api.ts → features/*/hooks → UI.
+    // Only lib/api.ts talks to the network.
+    "no-restricted-globals": [
+      "error",
+      {
+        "name": "fetch",
+        "message": "Only src/lib/api.ts calls fetch. Add a function to features/<feature>/api.ts that uses api()."
+      },
+      {
+        "name": "XMLHttpRequest",
+        "message": "Only src/lib/api.ts talks to the network."
+      }
+    ],
+    // The web app never reaches the database or API internals, and only
+    // features/*/api.ts uses the api() helper.
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "pg",
+            "message": "The web app never talks to the database. Call an API endpoint."
+          },
+          {
+            "name": "axios",
+            "message": "Use api() from src/lib/api.ts, through features/<feature>/api.ts."
+          },
+          {
+            "name": "@/lib/api",
+            "importNames": ["api"],
+            "message": "Only features/<feature>/api.ts calls api(). Components and hooks use those functions."
+          }
+        ],
+        "patterns": [
+          {
+            "group": [
+              "@lead-followup/api",
+              "@lead-followup/api/*",
+              "**/apps/api/**",
+              "**/api/src/**"
+            ],
+            "message": "The web app never imports API code. Call an API endpoint."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/lib/api.ts"],
+      "rules": { "no-restricted-globals": "off" }
+    },
+    {
+      // The one layer allowed to call api().
+      "files": ["src/features/*/api.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "pg",
+                "message": "The web app never talks to the database. Call an API endpoint."
+              },
+              { "name": "axios", "message": "Use api() from src/lib/api.ts." }
+            ],
+            "patterns": [
+              {
+                "group": [
+                  "@lead-followup/api",
+                  "@lead-followup/api/*",
+                  "**/apps/api/**",
+                  "**/api/src/**"
+                ],
+                "message": "The web app never imports API code. Call an API endpoint."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // UI reaches server data only through features/*/hooks.
+      "files": [
+        "src/components/**",
+        "src/pages/**",
+        "src/layouts/**",
+        "src/features/*/components/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "pg",
+                "message": "The web app never talks to the database. Call an API endpoint."
+              },
+              {
+                "name": "axios",
+                "message": "Use a hook from features/<feature>/hooks."
+              },
+              {
+                "name": "@/lib/api",
+                "importNames": ["api"],
+                "message": "UI doesn't call the API. Use a hook from features/<feature>/hooks."
+              }
+            ],
+            "patterns": [
+              {
+                "group": [
+                  "@lead-followup/api",
+                  "@lead-followup/api/*",
+                  "**/apps/api/**",
+                  "**/api/src/**"
+                ],
+                "message": "The web app never imports API code. Call an API endpoint."
+              },
+              {
+                "group": [
+                  "@/features/*/api",
+                  "../api",
+                  "../../features/*/api",
+                  "../features/*/api"
+                ],
+                "message": "UI doesn't call the API. Use a hook from features/<feature>/hooks."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }
