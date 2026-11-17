@@ -50,8 +50,15 @@ Check the official docs before writing or changing code, for the frontend and th
 - PostgreSQL row-level security: https://www.postgresql.org/docs/current/ddl-rowsecurity.html
 - Cookies (MDN): https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies
 - CORS (MDN): https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS
-- OWASP Top 10: https://owasp.org/Top10/
+- OWASP Top 10 (2025): https://owasp.org/Top10/2025/
 - OWASP Cheat Sheets: https://cheatsheetseries.owasp.org/
+- OWASP Node.js cheat sheet: https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html
+- OWASP CSRF cheat sheet: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+- Helmet: https://helmetjs.github.io/
+- Express behind proxies (`trust proxy`): https://expressjs.com/en/guide/behind-proxies.html
+- csrf-csrf (Double CSRF): https://github.com/Psifi-Solutions/csrf-csrf
+- OWASP Dependency-Check: https://owasp.org/www-project-dependency-check/
+- npm access tokens: https://docs.npmjs.com/about-access-tokens
 - npm audit: https://docs.npmjs.com/cli/v11/commands/npm-audit
 
 ## Commands
@@ -156,6 +163,30 @@ Check every change against these five areas before calling it done.
 - No debug or test-only endpoints in production, and no stack traces in responses (the error handler returns `{ error }` only).
 - No CORS by default: in development the web app and the API share one origin through the Vite proxy, and in production Nginx serves both. If CORS is ever needed, allow named origins only, never `*` together with credentials.
 - `x-powered-by` stays disabled. Add security headers before deploying.
+
+#### Backend checklist
+
+Go through this list for every change in `apps/api`, based on the [OWASP Top 10 (2025)](https://owasp.org/Top10/2025/). A box you can't tick blocks the change.
+
+- [ ] **Authentication and authorization.** The route uses `requireAuth`, or it is one of the public routes listed above. The handler then checks that the user may do this action on this record. Being logged in is not enough.
+- [ ] **SQL injection.** Every query uses `pg` placeholders (`$1`, `$2`), not `?` (that is MySQL syntax). Column names and `ORDER BY` come from a fixed list. No ORM (no Sequelize).
+- [ ] **Dependencies.** After adding or updating a package, run `npm audit` and fix high and critical findings. Check `npm outdated` before each release.
+- [ ] **HTTP headers.** Use `helmet()` in `app.ts` before deploying, for CSP, HSTS, `X-Content-Type-Options` and frame protection. Adding `helmet` is a new dependency, so ask first.
+- [ ] **Passwords and sessions.** Hash passwords with argon2. Never store them encrypted or in plain text. Make session tokens with `crypto.randomBytes`, and store only their SHA-256 hash (decision 0006). Compare secrets such as `X-Webhook-Secret` with `crypto.timingSafeEqual`. Don't write your own encryption: HTTPS protects data between browser and server.
+- [ ] **Where the browser keeps data.** Sessions live only in the `HttpOnly` cookie. Never put a token or sensitive data in `localStorage` or `sessionStorage`. Any script on the page can read both.
+- [ ] **HTTPS.** Production runs only over HTTPS with a valid TLS certificate at Nginx, and redirects HTTP to HTTPS. Set `app.set("trust proxy", 1)` there, so `Secure` cookies and the rate limiter see the real client.
+- [ ] **Rate limiting.** Login, the public lead form and other guessable or expensive routes use `express-rate-limit`. Its memory store counts per process. If the API ever runs more than one process, move the store to Redis (a decision first).
+- [ ] **CSRF.** The `SameSite=Lax` cookie is the base. Routes that change data accept only `application/json`, which a plain HTML form can't send. If a route ever has to accept form posts with the session cookie, add `csrf-csrf` (Double CSRF), and ask first.
+- [ ] **Cookie attributes.** Set and clear the session cookie only with `sessionCookieOptions` from `src/lib/session-cookie.ts`: `HttpOnly`, `SameSite=Lax`, `Secure` in production, `Path=/`. Setting it also passes `maxAge: SESSION_MAX_AGE_MS`, so the cookie expires with the session.
+- [ ] **Errors and logs.** Responses carry `{ error }` only, with no stack trace or SQL error text. Logs hold no passwords, tokens, cookies or request bodies.
+
+Before a release, also scan the whole project:
+
+- `npm audit` and `npm outdated` (required)
+- OWASP Dependency-Check, installed on your machine, not in the repo (optional)
+- Snyk (https://app.snyk.io) for dependency and code issues, and Burp Suite (https://portswigger.net/burp) to test the running API (optional)
+
+npm access tokens matter only when publishing a package. This repo is private and doesn't publish, so there's nothing to set up. If that changes, use a granular token with the least access, and keep it in a GitHub secret, never in the repo.
 
 ### Process
 
