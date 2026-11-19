@@ -1,6 +1,6 @@
 # Lead Follow-up: plan
 
-Last updated: 2026-10-27. This is the living scope: edit it when the scope changes. The reasons behind each choice are in [decisions/](decisions/).
+Last updated: 2026-11-19. This is the living scope: edit it when the scope changes. The reasons behind each choice are in [decisions/](decisions/).
 
 ## Goal
 
@@ -97,6 +97,6 @@ A small app that replies to new leads automatically and shows each lead's histor
 
 ## Open questions
 
-- [ ] Migrations: `node-pg-migrate`, or numbered `.sql` files with a small runner script? (week 1)
+- [x] Migrations: numbered `.sql` files with a small runner script, not `node-pg-migrate`. See [decision 0005](decisions/0005-numbered-sql-migrations.md).
 - [x] Sessions: my own `sessions` table and middleware. See [decision 0006](decisions/0006-own-sessions-table.md).
 - [ ] Email for testing: Resend test mode, or Mailtrap? (week 3)
