@@ -56,6 +56,7 @@ Every error is JSON in the shape `{ "error": string }`, so the web app's `src/li
 | ------ | ------------------------------------------------------------------------ |
 | 400    | The body failed validation, or isn't valid JSON (`Invalid request body`) |
 | 401    | No valid session on a route that needs one                               |
+| 403    | A browser request that changes data came from another site (CSRF check)  |
 | 404    | A `/api` route that doesn't exist (`Not found`)                          |
 | 429    | A rate limit was hit                                                     |
 | 500    | Something broke on the server (`Something went wrong`)                   |
@@ -74,6 +75,7 @@ apps/api/
 │  │  └─ leads/         public lead form route, shared createLead query, zod schema
 │  ├─ middleware/
 │  │  ├─ require-auth.ts  lets a request through only with a valid session cookie
+│  │  ├─ csrf.ts          blocks cross-site browser requests that change data
 │  │  ├─ validate.ts      checks req.body against a zod schema, returns 400 if it fails
 │  │  └─ rate-limit.ts    the login and public-lead limiters
 │  └─ lib/

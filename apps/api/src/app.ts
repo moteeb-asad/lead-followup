@@ -3,12 +3,14 @@ import express, { type ErrorRequestHandler } from "express";
 import { authRouter, meRouter } from "./features/auth/auth.routes.ts";
 import { healthRouter } from "./features/health/health.routes.ts";
 import { publicLeadsRouter } from "./features/leads/public-leads.routes.ts";
+import { csrfOriginCheck } from "./middleware/csrf.ts";
 
 export function createApp() {
   const app = express();
   app.disable("x-powered-by");
   app.use(express.json());
   app.use(cookieParser());
+  app.use("/api", csrfOriginCheck);
 
   app.use("/api/health", healthRouter);
   app.use("/api/auth", authRouter);
