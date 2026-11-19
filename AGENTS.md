@@ -176,7 +176,7 @@ Go through this list for every change in `apps/api`, based on the [OWASP Top 10 
 - [ ] **Where the browser keeps data.** Sessions live only in the `HttpOnly` cookie. Never put a token or sensitive data in `localStorage` or `sessionStorage`. Any script on the page can read both.
 - [ ] **HTTPS.** Production runs only over HTTPS with a valid TLS certificate at Nginx, and redirects HTTP to HTTPS. Set `app.set("trust proxy", 1)` there, so `Secure` cookies and the rate limiter see the real client.
 - [ ] **Rate limiting.** Login, the public lead form and other guessable or expensive routes use `express-rate-limit`. Its memory store counts per process. If the API ever runs more than one process, move the store to Redis (a decision first).
-- [ ] **CSRF.** The `SameSite=Lax` cookie is the base. Routes that change data accept only `application/json`, which a plain HTML form can't send. If a route ever has to accept form posts with the session cookie, add `csrf-csrf` (Double CSRF), and ask first.
+- [ ] **CSRF.** The `SameSite=Lax` cookie is the base. Routes that change data accept only `application/json`, which a plain HTML form can't send. `csrfOriginCheck` (`src/middleware/csrf.ts`) runs on all of `/api` and rejects a browser request that changes data and comes from another site (`Sec-Fetch-Site`, or `Origin` as a fallback). Keep it mounted before the routers. If a route ever has to accept form posts with the session cookie, add `csrf-csrf` (Double CSRF), and ask first.
 - [ ] **Cookie attributes.** Set and clear the session cookie only with `sessionCookieOptions` from `src/lib/session-cookie.ts`: `HttpOnly`, `SameSite=Lax`, `Secure` in production, `Path=/`. Setting it also passes `maxAge: SESSION_MAX_AGE_MS`, so the cookie expires with the session.
 - [ ] **Errors and logs.** Responses carry `{ error }` only, with no stack trace or SQL error text. Logs hold no passwords, tokens, cookies or request bodies.
 
@@ -191,6 +191,7 @@ npm access tokens matter only when publishing a package. This repo is private an
 ### Process
 
 - Add a line under `## [Unreleased]` in `CHANGELOG.md` for every user-visible change.
+- Keep [apps/api/README.md](apps/api/README.md) in step with the API: when a route, table, script or environment variable is added, changed or removed, update it in the same commit.
 - A new architectural decision gets a new file in `docs/decisions/` (copy `0000-template.md`). Never edit an accepted decision: write a new one that supersedes it.
 - If a change alters the scope, update `docs/PLAN.md` in the same commit.
 - Commit messages follow the format in [Commit messages](#commit-messages).
