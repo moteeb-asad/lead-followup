@@ -12,7 +12,7 @@ Every route lives under `/api`. A route is either public, or needs a logged-in s
 
 | Method | Route               | Access                                    | What it does                                                   |
 | ------ | ------------------- | ----------------------------------------- | -------------------------------------------------------------- |
-| GET    | `/api/health`       | Public                                    | Uptime check. Also checks the database connection.             |
+| GET    | `/api/health`       | Public, rate limited (60 per minute)      | Uptime check. Also checks the database connection.             |
 | POST   | `/api/auth/login`   | Public, rate limited (10 failed per 15 m) | Checks email and password, sets the session cookie.            |
 | POST   | `/api/auth/logout`  | Public                                    | Deletes the session row and clears the cookie.                 |
 | GET    | `/api/me`           | Logged in                                 | The current user, used by the web app to check the session.    |
@@ -24,6 +24,7 @@ Every route lives under `/api`. A route is either public, or needs a logged-in s
 
 - `200 {"status":"ok","database":"up"}`
 - `503 {"status":"error","database":"down"}` when the database can't be reached
+- `429` after 60 requests in a minute from one IP
 
 **`POST /api/auth/login`**
 
