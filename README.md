@@ -61,14 +61,92 @@ See [decision 0007](docs/decisions/0007-llm-lead-triage.md).
 
 ## Run locally
 
-Requirements: Node 24. PostgreSQL is needed once the API lands.
+Requirements: Node 24 and PostgreSQL 15 or newer. All commands run from the repo root.
+
+### 1. Install
 
 ```bash
+git clone https://github.com/moteeb-asad/lead-followup.git
+cd lead-followup
 npm install
-npm run dev:web
 ```
 
-Then open [http://localhost:5173/form](http://localhost:5173/form) (public form) and [http://localhost:5173/admin](http://localhost:5173/admin) (dashboard).
+### 2. Create the database
+
+The API connects as its own role, `lead_followup`, never as the `postgres` superuser. That role has no right to create databases, so a superuser creates it and the database once. Open `psql -U postgres` (on Windows, `psql.exe` is in the `PostgreSQL\<version>\bin` folder) or the Query Tool in pgAdmin, and run:
+
+```sql
+CREATE ROLE lead_followup LOGIN PASSWORD 'pick-a-password';
+CREATE DATABASE lead_followup OWNER lead_followup;
+```
+
+The role has to own the database. On PostgreSQL 15 and newer, only the owner can create tables in it, and the migrations need that.
+
+### 3. Set up `apps/api/.env`
+
+```bash
+cp apps/api/.env.example apps/api/.env
+```
+
+On Windows PowerShell, use `Copy-Item apps/api/.env.example apps/api/.env`. Then edit the three values in `apps/api/.env`:
+
+| Variable         | What to put                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`   | `postgres://lead_followup:<password>@localhost:5432/lead_followup`, with the password from step 2 |
+| `ADMIN_EMAIL`    | The email you will log in to the dashboard with                                                   |
+| `ADMIN_PASSWORD` | The dashboard password, at least 12 characters. It is only read once, in step 5.                  |
+
+If the database password has special characters, URL-encode them in `DATABASE_URL` (`@` becomes `%40`). `.env` is git-ignored. Never commit it.
+
+### 4. Create the tables
+
+```bash
+npm run db:migrate -w apps/api
+```
+
+You should see:
+
+```
+applied 0001_create_users.sql
+applied 0002_create_sessions.sql
+applied 0003_create_leads.sql
+migrations up to date
+```
+
+The command is safe to run again. It only applies migrations that haven't run yet. Don't paste the SQL files into pgAdmin by hand: the command also records each migration in `schema_migrations`, which is how it knows what has run ([decision 0005](docs/decisions/0005-numbered-sql-migrations.md)).
+
+### 5. Create the first user
+
+```bash
+npm run user:create -w apps/api
+```
+
+This reads `ADMIN_EMAIL` and `ADMIN_PASSWORD`, hashes the password with argon2id, and adds the user. You should see `Created you@example.com (id 1)`. Then **delete the `ADMIN_PASSWORD` line from `apps/api/.env`**: it isn't needed again.
+
+### 6. Start the app
+
+Run these in two terminals:
+
+```bash
+npm run dev:api    # http://localhost:4000
+npm run dev:web    # http://localhost:5173
+```
+
+- [http://localhost:5173/admin/login](http://localhost:5173/admin/login): log in with `ADMIN_EMAIL` and the password from step 3
+- [http://localhost:5173/form](http://localhost:5173/form): public form
+- [http://localhost:5173/api/health](http://localhost:5173/api/health): should return `{"status":"ok","database":"up"}`
+
+### If something goes wrong
+
+| You see                                                   | Why, and what to do                                                                                                           |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL is not set`                                 | `apps/api/.env` is missing or is in the wrong folder. It goes in `apps/api/`, not the repo root.                              |
+| `password authentication failed for user "lead_followup"` | The password in `DATABASE_URL` doesn't match step 2. Reset it with `ALTER ROLE lead_followup PASSWORD '...';` as a superuser. |
+| `permission denied for schema public`                     | `lead_followup` doesn't own the database. As a superuser: `ALTER DATABASE lead_followup OWNER TO lead_followup;`              |
+| `ADMIN_PASSWORD must be at least 12 characters`           | Use a longer password in `.env`, then run step 5 again.                                                                       |
+| `you@example.com already exists`                          | The user is already created. Log in with the password you used the first time.                                                |
+| `/api/health` returns `"database":"down"`                 | The API can't reach PostgreSQL. Check that it's running and that `DATABASE_URL` is right.                                     |
+| `Too many login attempts`                                 | After 10 wrong passwords, login is locked for 15 minutes. Restarting `npm run dev:api` clears the count.                      |
 
 ## Project docs
 
