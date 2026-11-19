@@ -191,6 +191,7 @@ npm access tokens matter only when publishing a package. This repo is private an
 ### Process
 
 - Add a line under `## [Unreleased]` in `CHANGELOG.md` for every user-visible change.
+- Keep [apps/api/README.md](apps/api/README.md) in step with the API: when a route, table, script or environment variable is added, changed or removed, update it in the same commit.
 - A new architectural decision gets a new file in `docs/decisions/` (copy `0000-template.md`). Never edit an accepted decision: write a new one that supersedes it.
 - If a change alters the scope, update `docs/PLAN.md` in the same commit.
 - Commit messages follow the format in [Commit messages](#commit-messages).
