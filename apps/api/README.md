@@ -42,7 +42,9 @@ Every route lives under `/api`. A route is either public, or needs a logged-in s
 
 **`POST /api/public/leads`**
 
-- Body: `{ "name": string, "email": string, "phone"?: string, "service"?: string, "message"?: string, "company"?: string }`
+- Body: `{ "submissionId": uuid, "name": string, "email": string, "phone"?: string, "service"?: string, "message"?: string, "company"?: string }`
+  - `submissionId` is required. The browser makes one per send and sends the same one again if it retries the same data. It is saved as the lead's `external_id`, and the unique `(source, external_id)` key makes a repeat save nothing. The repeat still gets `201`, so a retry after a timeout is safe.
+  - **The same enquiry is saved once.** A lead with the same email (any case), service and message as an existing one is not saved, whatever its name, phone or `submissionId`, and however long ago the first one came in. A missing service or message counts as empty. The sender still gets `201`, so a bot can't tell it was dropped, and a person who sends twice sees the same thank-you. This is the unique index `leads_content_key` (migration `0004`), so two identical requests at the same moment still make one lead.
   - `name` is required, at most 100 characters. `email` must be a valid email, at most 254. `phone` is at most 30, `service` at most 100, `message` at most 5000. Empty optional fields are saved as NULL. Keys that aren't listed are dropped.
   - `company` is the honeypot: a hidden field that people never see. If it has a value, the API answers as if the lead was saved, and saves nothing ([decision 0004](../../docs/decisions/0004-public-form-route.md)).
 - `201 {"ok":true}`. The lead's id is never returned.
@@ -92,12 +94,12 @@ Each feature folder follows one pattern: `*.routes.ts` handles the request, `*.q
 
 PostgreSQL through `pg`, with parameterized SQL (`$1`, `$2`) and no ORM ([decision 0002](../../docs/decisions/0002-plain-sql-no-orm.md)).
 
-| Table               | Migration                  | Holds                                                       |
-| ------------------- | -------------------------- | ----------------------------------------------------------- |
-| `users`             | `0001_create_users.sql`    | The admin login. Passwords are stored as argon2id hashes.   |
-| `sessions`          | `0002_create_sessions.sql` | Only the SHA-256 hash of each session token, with an expiry |
-| `leads`             | `0003_create_leads.sql`    | Leads from the form (and later the webhook)                 |
-| `schema_migrations` | created by the runner      | Which migration files have already run                      |
+| Table               | Migration                                                | Holds                                                                                                |
+| ------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `users`             | `0001_create_users.sql`                                  | The admin login. Passwords are stored as argon2id hashes.                                            |
+| `sessions`          | `0002_create_sessions.sql`                               | Only the SHA-256 hash of each session token, with an expiry                                          |
+| `leads`             | `0003_create_leads.sql`, `0004_leads_unique_content.sql` | Leads from the form (and later the webhook). The same email, service and message is saved only once. |
+| `schema_migrations` | created by the runner                                    | Which migration files have already run                                                               |
 
 Schema changes go in a new numbered file in `migrations/` ([decision 0005](../../docs/decisions/0005-numbered-sql-migrations.md)). The setup steps for a new machine are in the [root README](../../README.md#run-locally).
 
