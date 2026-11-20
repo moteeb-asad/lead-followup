@@ -20,4 +20,4 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Leads list design: status and source filters, a table with status and auto-reply badges, and pagination, showing sample data until the leads API exists.
 - Lead detail design: contact details and message, a timeline of the lead's events, a status picker and a reply form, showing a sample lead until the leads API exists.
 - Settings design at `/admin/settings`, linked from the sidebar: the automation rule, lead sources with the webhook secret, the template editor, account and data panels, all static until the settings API exists.
-- Lead form submits to the API and saves the lead. Every rule is checked with a zod schema, browser validation is off, errors show under each field, and the send button stays disabled until the form is valid.
+- Lead form submits to the API and saves the lead. Every rule is checked with a zod schema, browser validation is off, errors show under each field, and the send button stays disabled until the form is valid. A request that takes longer than 15 seconds is cancelled, and the same enquiry (same email, service and message) is only ever saved once.

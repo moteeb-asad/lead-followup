@@ -13,10 +13,13 @@ const chipClass =
   "inline-flex h-11 items-center border border-ink px-4 text-sm font-medium hover:bg-paper-2 peer-checked:bg-ink peer-checked:text-paper peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-cobalt";
 
 // 4xx errors carry a message written for the user ("Too many requests..."),
-// anything else gets a generic one.
+// a timeout and anything else get their own.
 function submitErrorMessage(error: Error | null) {
   if (!error) return undefined;
   if (error instanceof ApiError && error.status < 500) return error.message;
+  if (error.name === "TimeoutError") {
+    return "That took too long. Check your connection and press Send again.";
+  }
   return "Couldn't send your request. Try again in a moment.";
 }
 
