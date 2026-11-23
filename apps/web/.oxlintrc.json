@@ -13,6 +13,9 @@
     "react/no-danger": "error",
     "react/jsx-no-script-url": "error",
     "react/jsx-no-target-blank": "error",
+    // console.log and console.debug are easy to leave behind with personal
+    // data in them. console.info, console.warn and console.error are fine.
+    "no-console": ["error", { "allow": ["info", "warn", "error"] }],
 
     // Layering: lib/api.ts → features/*/api.ts → features/*/hooks → UI.
     // Only lib/api.ts talks to the network.

@@ -4,14 +4,14 @@ import { pool } from "./db.ts";
 const port = Number(process.env.PORT ?? 4000);
 
 const server = createApp().listen(port, () => {
-  console.log(`API listening on http://localhost:${port}`);
+  console.info(`API listening on http://localhost:${port}`);
 });
 
 // Ctrl+C or a deploy stops the API in order: stop taking new requests, let the
 // running ones finish, then close the database connections.
 // https://node-postgres.com/apis/pool (pool.end)
 function shutdown(signal: string) {
-  console.log(`${signal} received, shutting down`);
+  console.info(`${signal} received, shutting down`);
 
   // A stuck request shouldn't keep the process alive forever.
   setTimeout(() => process.exit(1), 10_000).unref();

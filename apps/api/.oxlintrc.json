@@ -8,6 +8,10 @@
     "no-implied-eval": "error",
     "no-new-func": "error",
     "no-script-url": "error",
+    // Use console.info for status messages and console.warn or console.error
+    // for problems. console.log and console.debug are easy to leave behind
+    // with a password or token in them.
+    "no-console": ["error", { "allow": ["info", "warn", "error"] }],
     "no-restricted-imports": [
       "error",
       {
@@ -23,5 +27,13 @@
         ]
       }
     ]
-  }
+  },
+  "overrides": [
+    {
+      // Command-line scripts print their results to the terminal. That is
+      // their output, not logging.
+      "files": ["scripts/**"],
+      "rules": { "no-console": "off" }
+    }
+  ]
 }
