@@ -120,8 +120,10 @@ components, pages, layouts   use hooks, never the layers below
 
 `.oxlintrc.json` in each app enforces these. `npm run lint` fails on:
 
-- **web:** `fetch` or `XMLHttpRequest` outside `src/lib/api.ts`; `axios`, `pg` or `apps/api` imports; `api()` outside `features/*/api.ts`; components, pages or layouts importing a `features/*/api` module; `any`; `eval` and `new Function`; `dangerouslySetInnerHTML`; `javascript:` URLs; `target="_blank"` without `rel="noreferrer"`
-- **api:** `any`; `eval` and `new Function`; `child_process`
+- **web:** `fetch` or `XMLHttpRequest` outside `src/lib/api.ts`; `axios`, `pg` or `apps/api` imports; `api()` outside `features/*/api.ts`; components, pages or layouts importing a `features/*/api` module; `any`; `eval` and `new Function`; `dangerouslySetInnerHTML`; `javascript:` URLs; `target="_blank"` without `rel="noreferrer"`; `console.log` and `console.debug`
+- **api:** `any`; `eval` and `new Function`; `child_process`; `console.log` and `console.debug` (the `scripts/` folder is excluded, because command-line scripts print their results)
+
+Use `console.info` for status messages, and `console.warn` or `console.error` for problems. Never put a password, token, cookie or request body in any of them.
 
 Don't turn a rule off or add a disable comment to get past it. If a rule seems wrong, ask the maintainer.
 
