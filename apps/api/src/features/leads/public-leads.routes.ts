@@ -33,7 +33,11 @@ publicLeadsRouter.post(
   honeypot,
   validate(publicLeadBody),
   async (req, res) => {
-    await createLead(req.body, "form");
+    // A repeat (same submissionId, or the same email, service and message)
+    // saves nothing but gets the same answer. The sender can't tell a repeat
+    // from a new lead, and the person already has what they asked for.
+    const { submissionId, ...lead } = req.body;
+    await createLead(lead, "form", submissionId);
     res.status(201).json({ ok: true });
   },
 );

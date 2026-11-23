@@ -1,5 +1,9 @@
-import { useState, type FormEvent } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { ApiError } from "@/lib/api";
 import { business } from "../business";
+import { useSubmitLead } from "../hooks/useSubmitLead";
+import { leadFormSchema, type LeadFormInput } from "../validators/lead.schema";
 
 const labelClass =
   "flex items-baseline gap-3 font-mono text-label text-muted uppercase";
@@ -8,21 +12,60 @@ const inputClass =
 const chipClass =
   "inline-flex h-11 items-center border border-ink px-4 text-sm font-medium hover:bg-paper-2 peer-checked:bg-ink peer-checked:text-paper peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-cobalt";
 
-// The public form a business puts on its website. Styled as a ticket.
-// TODO(week 3): send the form to POST /api/public/leads.
-export default function LeadForm() {
-  const [notice, setNotice] = useState<string | null>(null);
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setNotice("Saving leads isn't connected yet. It arrives with the API.");
+// 4xx errors carry a message written for the user ("Too many requests..."),
+// a timeout and anything else get their own.
+function submitErrorMessage(error: Error | null) {
+  if (!error) return undefined;
+  if (error instanceof ApiError && error.status < 500) return error.message;
+  if (error.name === "TimeoutError") {
+    return "That took too long. Check your connection and press Send again.";
   }
+  return "Couldn't send your request. Try again in a moment.";
+}
+
+function FieldError({ id, message }: { id: string; message?: string }) {
+  if (!message) return null;
+  return (
+    <p id={id} role="alert" className="font-mono text-xs text-alert">
+      {message}
+    </p>
+  );
+}
+
+// The public form a business puts on its website. Styled as a ticket.
+// Native browser validation is off (noValidate): the zod schema decides, and
+// the button stays disabled until every rule passes. The API checks again.
+export default function LeadForm() {
+  const submit = useSubmitLead();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isValid },
+  } = useForm<LeadFormInput>({
+    resolver: zodResolver(leadFormSchema),
+    // Validate on blur and on every change, so the button reacts as people type.
+    mode: "all",
+    defaultValues: {
+      name: "",
+      phone: "",
+      email: "",
+      service: business.services[0],
+      message: "",
+      company: "",
+    },
+  });
+
+  const errorMessage = submitErrorMessage(submit.error);
 
   return (
     <section className="lg:col-span-7" aria-labelledby="form-title">
       <form
+        noValidate
         className="border-2 border-ink bg-card shadow-hard-lg"
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit((data) =>
+          submit.mutate(data, { onSuccess: () => reset() }),
+        )}
       >
         <div className="flex flex-wrap items-center justify-between gap-2 px-6 py-5 sm:px-8">
           <h2
@@ -50,12 +93,15 @@ export default function LeadForm() {
             </label>
             <input
               id="name"
-              name="name"
               type="text"
               autoComplete="name"
-              required
+              aria-required="true"
+              aria-invalid={errors.name ? true : undefined}
+              aria-describedby={errors.name ? "name-error" : undefined}
               className={`${inputClass} h-11`}
+              {...register("name")}
             />
+            <FieldError id="name-error" message={errors.name?.message} />
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="phone" className={labelClass}>
@@ -66,11 +112,14 @@ export default function LeadForm() {
             </label>
             <input
               id="phone"
-              name="phone"
               type="tel"
               autoComplete="tel"
+              aria-invalid={errors.phone ? true : undefined}
+              aria-describedby={errors.phone ? "phone-error" : undefined}
               className={`${inputClass} h-11`}
+              {...register("phone")}
             />
+            <FieldError id="phone-error" message={errors.phone?.message} />
           </div>
           <div className="flex flex-col gap-2 sm:col-span-2">
             <label htmlFor="email" className={labelClass}>
@@ -78,13 +127,16 @@ export default function LeadForm() {
             </label>
             <input
               id="email"
-              name="email"
               type="email"
               autoComplete="email"
-              required
               placeholder="you@example.com"
+              aria-required="true"
+              aria-invalid={errors.email ? true : undefined}
+              aria-describedby={errors.email ? "email-error" : undefined}
               className={`${inputClass} h-11`}
+              {...register("email")}
             />
+            <FieldError id="email-error" message={errors.email?.message} />
           </div>
 
           <fieldset className="sm:col-span-2">
@@ -92,14 +144,13 @@ export default function LeadForm() {
               <span className="text-ink">04</span>What do you need?
             </legend>
             <div className="flex flex-wrap gap-2">
-              {business.services.map((service, index) => (
+              {business.services.map((service) => (
                 <label key={service} className="cursor-pointer">
                   <input
                     type="radio"
-                    name="service"
                     value={service}
-                    defaultChecked={index === 0}
                     className="peer sr-only"
+                    {...register("service")}
                   />
                   <span className={chipClass}>{service}</span>
                 </label>
@@ -113,11 +164,14 @@ export default function LeadForm() {
             </label>
             <textarea
               id="message"
-              name="message"
               rows={4}
               placeholder="What happened, and when can we visit?"
+              aria-invalid={errors.message ? true : undefined}
+              aria-describedby={errors.message ? "message-error" : undefined}
               className={`${inputClass} py-2.5`}
+              {...register("message")}
             />
+            <FieldError id="message-error" message={errors.message?.message} />
           </div>
 
           {/* Honeypot: hidden from people, bots fill it in. See decision 0004. */}
@@ -125,19 +179,20 @@ export default function LeadForm() {
             <label htmlFor="company">Company</label>
             <input
               id="company"
-              name="company"
               type="text"
               tabIndex={-1}
               autoComplete="off"
+              {...register("company")}
             />
           </div>
 
           <div className="flex flex-col gap-4 border-t border-line pt-6 sm:col-span-2 sm:flex-row sm:items-center">
             <button
               type="submit"
-              className="inline-flex h-11 items-center justify-center gap-2 border-2 border-ink bg-signal px-6 font-bold text-ink shadow-hard hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cobalt"
+              disabled={!isValid || submit.isPending}
+              className="inline-flex h-11 items-center justify-center gap-2 border-2 border-ink bg-signal px-6 font-bold text-ink shadow-hard hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cobalt disabled:pointer-events-none disabled:opacity-60 cursor-pointer"
             >
-              Send request
+              {submit.isPending ? "Sending…" : "Send request"}
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -156,12 +211,20 @@ export default function LeadForm() {
             </p>
           </div>
 
-          {notice && (
+          {submit.isSuccess && (
             <p
               role="status"
+              className="border border-ink bg-paper-2 px-3 py-2 text-sm text-ink sm:col-span-2"
+            >
+              Thanks, we've got your request. We'll reply within a minute.
+            </p>
+          )}
+          {errorMessage && (
+            <p
+              role="alert"
               className="border border-alert bg-alert-soft px-3 py-2 text-sm text-alert sm:col-span-2"
             >
-              {notice}
+              {errorMessage}
             </p>
           )}
         </div>

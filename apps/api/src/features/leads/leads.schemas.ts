@@ -10,8 +10,8 @@ const optionalText = (max: number) =>
     .nullish()
     .transform((value) => value ?? null);
 
-// What the public form sends. Keys that aren't listed here are dropped.
-export const publicLeadBody = z.object({
+// The lead's own fields, whichever route it came in through.
+const leadFields = z.object({
   name: z.string().trim().min(1, "Enter your name").max(100),
   email: z
     .string()
@@ -23,4 +23,12 @@ export const publicLeadBody = z.object({
   message: optionalText(5000),
 });
 
-export type NewLead = z.output<typeof publicLeadBody>;
+// What the public form sends. Keys that aren't listed here are dropped.
+// submissionId is made by the browser once per send and is kept when the same
+// data is sent again after a failure. It is stored as external_id, so the
+// unique (source, external_id) key turns a repeat into a no-op.
+export const publicLeadBody = leadFields.extend({
+  submissionId: z.uuid("Invalid request"),
+});
+
+export type NewLead = z.output<typeof leadFields>;
