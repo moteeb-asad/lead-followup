@@ -32,3 +32,29 @@ export const publicLeadBody = leadFields.extend({
 });
 
 export type NewLead = z.output<typeof leadFields>;
+
+// The values the database allows (migration 0003). Filters are checked against
+// these lists, so nothing else can reach the SQL.
+export const leadStatuses = ["new", "contacted", "won", "lost"] as const;
+export const leadSources = ["form", "webhook"] as const;
+
+// Query string for GET /api/leads. Leave a filter out to get every value.
+export const listLeadsQuery = z.object({
+  status: z
+    .enum(leadStatuses, "Status must be new, contacted, won or lost")
+    .optional(),
+  source: z.enum(leadSources, "Source must be form or webhook").optional(),
+  page: z.coerce
+    .number("Page must be a number")
+    .int("Page must be a whole number")
+    .min(1, "Page must be 1 or more")
+    .default(1),
+  pageSize: z.coerce
+    .number("Page size must be a number")
+    .int("Page size must be a whole number")
+    .min(1, "Page size must be 1 or more")
+    .max(100, "Page size must be 100 or less")
+    .default(20),
+});
+
+export type ListLeadsQuery = z.output<typeof listLeadsQuery>;
