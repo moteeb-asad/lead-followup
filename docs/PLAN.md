@@ -11,7 +11,7 @@ A small app that replies to new leads automatically and shows each lead's histor
 
 ## How one lead flows
 
-1. A lead arrives from the public form (`/form`) or a webhook from another tool.
+1. A lead arrives from the public form (`/form`). Later, a webhook from another tool can send one too.
 2. The API saves the lead, an outbox row in `messages` and an activity row in **one transaction**.
 3. Every 5 seconds the worker claims due messages with `FOR UPDATE SKIP LOCKED` and sends them.
 4. Sent: status `sent` plus an activity row. Failed: retried after 1 minute, then 5. After the 3rd failure it is marked `failed`.
@@ -46,7 +46,7 @@ A small app that replies to new leads automatically and shows each lead's histor
 | Method           | Route                     | What it does                                 | Access                         |
 | ---------------- | ------------------------- | -------------------------------------------- | ------------------------------ |
 | POST             | `/api/public/leads`       | Lead from the public form                    | Public, rate limited, honeypot |
-| POST             | `/api/webhooks/leads`     | Lead from another tool's server              | `X-Webhook-Secret` header      |
+| POST             | `/api/webhooks/leads`     | Later: lead from another tool's server       | `X-Webhook-Secret` header      |
 | POST             | `/api/auth/login`         | Checks the password, sets the session cookie | Public                         |
 | POST             | `/api/auth/logout`        | Ends the session                             | Logged in                      |
 | GET              | `/api/me`                 | Current user                                 | Logged in                      |
@@ -66,7 +66,7 @@ A small app that replies to new leads automatically and shows each lead's histor
 - `/admin`: dashboard with four numbers (new leads today, auto-replies sent, failed, average first reply)
 - `/admin/leads`: leads table with status and source filters
 - `/admin/leads/:id`: contact details, timeline, status buttons, manual reply
-- Templates and settings (webhook secret, the automation rule) come in week 5
+- Templates and settings (the automation rule) come in week 5. The webhook secret panel waits for the webhook.
 
 ## Environments
 
@@ -82,7 +82,7 @@ A small app that replies to new leads automatically and shows each lead's histor
 
 ## Build order
 
-1. **Week 1, Express basics.** Workspace for `apps/api`, Express 5 + TypeScript, health route, error handler, zod, `pg`, first migration (`leads`), `POST /api/webhooks/leads` and `GET /api/leads`. Done when a lead posted with curl lands in Postgres and comes back from the list route.
+1. **Week 1, Express basics.** Workspace for `apps/api`, Express 5 + TypeScript, health route, error handler, zod, `pg`, first migration (`leads`), the public form route, `GET /api/leads`, and the leads table showing real leads. Done when a lead sent from `/form` lands in Postgres and shows in the leads table at `/admin/leads`.
 2. **Week 2, login and the leads API.** `users`, `sessions`, login and logout, route protection, lead detail, status changes, `activity_log`, first tests. Done when protected routes return 401 without a session and the tests pass.
 3. **Week 3, outbox and worker.** `templates`, `automations`, `messages`, the public form route, the worker with retries, Resend in test mode. Done when a new lead gets an email within a minute and a forced failure retries 3 times, then shows as failed.
 4. **Week 4, frontend.** Login, leads table, lead detail and timeline, dashboard numbers, the form connected. Done when the whole flow works from the browser.
@@ -91,9 +91,9 @@ A small app that replies to new leads automatically and shows each lead's histor
 
 ## Scope
 
-**In v1:** one admin login, leads from the form and the webhook, email only, one automation rule, the screens above.
+**In v1:** one admin login, leads from the form, email only, one automation rule, the screens above.
 
-**Later:** CSV import with a row-by-row error report, nightly Excel export, a "no reply after 2 days" reminder, SMS and WhatsApp, more users and roles, Docker.
+**Later:** the lead webhook (`POST /api/webhooks/leads`, protected by `X-Webhook-Secret`) for leads from other tools such as ad platforms and booking widgets, CSV import with a row-by-row error report, nightly Excel export, a "no reply after 2 days" reminder, SMS and WhatsApp, more users and roles, Docker.
 
 ## Open questions
 
