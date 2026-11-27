@@ -10,13 +10,14 @@ The reasons behind the main choices are in [docs/decisions/](../../docs/decision
 
 Every route lives under `/api`. A route is either public, or needs a logged-in session (`requireAuth`). Public routes need a reason in `docs/PLAN.md`.
 
-| Method | Route               | Access                                    | What it does                                                   |
-| ------ | ------------------- | ----------------------------------------- | -------------------------------------------------------------- |
-| GET    | `/api/health`       | Public, rate limited (60 per minute)      | Uptime check. Also checks the database connection.             |
-| POST   | `/api/auth/login`   | Public, rate limited (10 failed per 15 m) | Checks email and password, sets the session cookie.            |
-| POST   | `/api/auth/logout`  | Public                                    | Deletes the session row and clears the cookie.                 |
-| GET    | `/api/me`           | Logged in                                 | The current user, used by the web app to check the session.    |
-| POST   | `/api/public/leads` | Public, rate limited (5 per minute)       | Saves a lead from the public form on `/form`, with a honeypot. |
+| Method | Route               | Access                                    | What it does                                                      |
+| ------ | ------------------- | ----------------------------------------- | ----------------------------------------------------------------- |
+| GET    | `/api/health`       | Public, rate limited (60 per minute)      | Uptime check. Also checks the database connection.                |
+| POST   | `/api/auth/login`   | Public, rate limited (10 failed per 15 m) | Checks email and password, sets the session cookie.               |
+| POST   | `/api/auth/logout`  | Public                                    | Deletes the session row and clears the cookie.                    |
+| GET    | `/api/me`           | Logged in                                 | The current user, used by the web app to check the session.       |
+| GET    | `/api/leads`        | Logged in                                 | One page of leads for the leads table, filtered and newest first. |
+| POST   | `/api/public/leads` | Public, rate limited (5 per minute)       | Saves a lead from the public form on `/form`, with a honeypot.    |
 
 ### Request and response details
 
@@ -39,6 +40,19 @@ Every route lives under `/api`. A route is either public, or needs a logged-in s
 **`GET /api/me`**
 
 - `200 {"id","email"}`, or `401 {"error":"Not logged in"}`
+
+**`GET /api/leads`**
+
+- Query string, all optional:
+  - `status`: `new`, `contacted`, `won` or `lost`
+  - `source`: `form` or `webhook`
+  - `page`: a whole number, 1 or more. Default 1.
+  - `pageSize`: a whole number from 1 to 100. Default 20.
+  - Leave a filter out to get every value. A value that isn't listed, or a filter given twice, returns `400`. Nothing from the query string is ever put into SQL as text.
+- `200 {"items": [...], "total": number, "page": number, "pageSize": number}`
+  - Each item is `{ id, name, email, phone, service, source, status, createdAt }`. `id` is a string. `phone` and `service` can be `null`. The full message isn't included: it belongs to the lead detail page.
+  - Newest first. `total` is the number of leads that match the filters, not the size of this page. A page past the end returns no items and the same `total`.
+- `401 {"error":"Not logged in"}` without a session. The login check runs before the query is checked, so someone logged out gets `401` for any query.
 
 **`POST /api/public/leads`**
 
@@ -74,11 +88,11 @@ apps/api/
 │  ├─ features/         one folder per feature
 │  │  ├─ auth/          login, logout, /api/me: routes, queries, zod schemas
 │  │  ├─ health/        GET /api/health
-│  │  └─ leads/         public lead form route, shared createLead query, zod schema
+│  │  └─ leads/         leads list and public lead form routes, queries, zod schemas
 │  ├─ middleware/
 │  │  ├─ require-auth.ts  lets a request through only with a valid session cookie
 │  │  ├─ csrf.ts          blocks cross-site browser requests that change data
-│  │  ├─ validate.ts      checks req.body against a zod schema, returns 400 if it fails
+│  │  ├─ validate.ts      checks req.body (or req.query) against a zod schema, returns 400 if it fails
 │  │  └─ rate-limit.ts    the login and public-lead limiters
 │  └─ lib/
 │     └─ session-cookie.ts  session token, its SHA-256 hash, and the cookie options
