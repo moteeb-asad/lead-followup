@@ -1,7 +1,7 @@
-import LeadContact from "@/features/leads/components/LeadContact";
-import LeadHeader from "@/features/leads/components/LeadHeader";
-import LeadTimeline from "@/features/leads/components/LeadTimeline";
-import ReplyForm from "@/features/leads/components/ReplyForm";
+import LeadContact from "@/features/leads/components/lead-detail/LeadContact";
+import LeadHeader from "@/features/leads/components/lead-detail/LeadHeader";
+import LeadTimeline from "@/features/leads/components/lead-detail/LeadTimeline";
+import ReplyForm from "@/features/leads/components/lead-detail/ReplyForm";
 
 // TODO(week 4): load the lead and its timeline from GET /api/leads/:id.
 // Every lead shows the design's sample lead (Sara Khan) until then.

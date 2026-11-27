@@ -1,4 +1,4 @@
-import PanelTitle from "./PanelTitle";
+import PanelTitle from "../PanelTitle";
 
 const linkClass =
   "underline decoration-line underline-offset-4 hover:decoration-ink";

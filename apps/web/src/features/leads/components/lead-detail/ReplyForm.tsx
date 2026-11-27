@@ -1,5 +1,5 @@
 import { business } from "@/features/lead-form/business";
-import PanelTitle from "./PanelTitle";
+import PanelTitle from "../PanelTitle";
 
 const labelClass = "font-mono text-label text-muted uppercase";
 const fieldClass =
