@@ -2,6 +2,7 @@ import cookieParser from "cookie-parser";
 import express, { type ErrorRequestHandler } from "express";
 import { authRouter, meRouter } from "./features/auth/auth.routes.ts";
 import { healthRouter } from "./features/health/health.routes.ts";
+import { leadsRouter } from "./features/leads/leads.routes.ts";
 import { publicLeadsRouter } from "./features/leads/public-leads.routes.ts";
 import { csrfOriginCheck } from "./middleware/csrf.ts";
 
@@ -15,6 +16,7 @@ export function createApp() {
   app.use("/api/health", healthRouter);
   app.use("/api/auth", authRouter);
   app.use("/api/me", meRouter);
+  app.use("/api/leads", leadsRouter);
   app.use("/api/public/leads", publicLeadsRouter);
 
   // Any /api route that didn't match above
