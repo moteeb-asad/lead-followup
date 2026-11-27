@@ -1,4 +1,4 @@
-import PanelTitle from "./PanelTitle";
+import PanelTitle from "../PanelTitle";
 
 // The marker style tells events apart: solid for received, outlined for
 // queued, lime for sent, cobalt for a status change.

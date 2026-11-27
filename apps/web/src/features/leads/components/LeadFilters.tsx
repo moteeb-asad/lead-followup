@@ -1,26 +1,38 @@
-const statuses = [
-  { label: "All", count: 148, swatch: "" },
-  { label: "New", count: 7, swatch: "border border-ink bg-signal" },
-  { label: "Contacted", count: 41, swatch: "bg-cobalt" },
-  { label: "Won", count: 64, swatch: "bg-ink" },
-  { label: "Lost", count: 36, swatch: "border border-muted" },
+import { leadSources, type LeadSource, type LeadStatus } from "../types";
+
+// "All" has no status. The swatches are the colours of the status badges.
+const statuses: {
+  value: LeadStatus | undefined;
+  label: string;
+  swatch: string;
+}[] = [
+  { value: undefined, label: "All", swatch: "" },
+  { value: "new", label: "New", swatch: "border border-ink bg-signal" },
+  { value: "contacted", label: "Contacted", swatch: "bg-cobalt" },
+  { value: "won", label: "Won", swatch: "bg-ink" },
+  { value: "lost", label: "Lost", swatch: "border border-muted" },
 ];
 
-const selects = [
-  {
-    id: "source",
-    label: "Source",
-    options: ["All sources", "Website form", "Webhook"],
-  },
-  {
-    id: "received",
-    label: "Received",
-    options: ["Any time", "Today", "Last 7 days", "Last 30 days"],
-  },
-];
+const sourceLabels: Record<LeadSource, string> = {
+  form: "Website form",
+  webhook: "Webhook",
+};
 
-// Static for now: "All" is selected and nothing filters yet.
-export default function LeadFilters() {
+type LeadFiltersProps = {
+  status: LeadStatus | undefined;
+  source: LeadSource | undefined;
+  onStatusChange: (status: LeadStatus | undefined) => void;
+  onSourceChange: (source: LeadSource | undefined) => void;
+};
+
+// The filters above the leads table. They only report what the person picks:
+// the screen puts it in the URL, and the API does the filtering.
+export default function LeadFilters({
+  status,
+  source,
+  onStatusChange,
+  onSourceChange,
+}: LeadFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-3 border-y-2 border-ink py-3">
       <div
@@ -28,66 +40,67 @@ export default function LeadFilters() {
         aria-label="Filter by status"
         className="flex flex-wrap"
       >
-        {statuses.map((status, i) => {
-          const selected = i === 0;
+        {statuses.map((item, i) => {
+          const selected = item.value === status;
           return (
             <button
-              key={status.label}
+              key={item.label}
               type="button"
               aria-pressed={selected}
-              className={`inline-flex h-11 items-center gap-2 border border-ink px-4 text-sm font-semibold ${
+              onClick={() => onStatusChange(item.value)}
+              className={`inline-flex h-11 items-center gap-2 border border-ink px-4 text-sm font-semibold focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt ${
                 i > 0 ? "-ml-px" : ""
               } ${selected ? "bg-ink text-paper" : "bg-card hover:bg-paper-2"}`}
             >
-              {status.swatch && (
+              {item.swatch && (
                 <span
-                  className={`size-2.5 ${status.swatch}`}
+                  className={`size-2.5 ${item.swatch}`}
                   aria-hidden="true"
                 />
               )}
-              {status.label}
-              <span
-                className={`font-mono text-label ${selected ? "text-fog" : "text-muted"}`}
-              >
-                {status.count}
-              </span>
+              {item.label}
             </button>
           );
         })}
       </div>
 
-      <div className="ml-auto flex flex-wrap items-center gap-4">
-        {selects.map((select) => (
-          <div key={select.id} className="flex items-center gap-2">
-            <label
-              htmlFor={select.id}
-              className="font-mono text-label text-muted uppercase"
-            >
-              {select.label}
-            </label>
-            <div className="relative">
-              <select
-                id={select.id}
-                className="h-11 appearance-none border border-ink bg-card pr-9 pl-3 text-sm font-medium focus:outline-2 focus:outline-offset-2 focus:outline-cobalt"
-              >
-                {select.options.map((option) => (
-                  <option key={option}>{option}</option>
-                ))}
-              </select>
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.25"
-                strokeLinecap="square"
-                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
-                aria-hidden="true"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </div>
-          </div>
-        ))}
+      <div className="ml-auto flex items-center gap-2">
+        <label
+          htmlFor="lead-source"
+          className="font-mono text-label text-muted uppercase"
+        >
+          Source
+        </label>
+        <div className="relative">
+          <select
+            id="lead-source"
+            value={source ?? ""}
+            onChange={(event) =>
+              onSourceChange(
+                leadSources.find((item) => item === event.target.value),
+              )
+            }
+            className="h-11 appearance-none border border-ink bg-card pr-9 pl-3 text-sm font-medium focus:outline-2 focus:outline-offset-2 focus:outline-cobalt"
+          >
+            <option value="">All sources</option>
+            {leadSources.map((item) => (
+              <option key={item} value={item}>
+                {sourceLabels[item]}
+              </option>
+            ))}
+          </select>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.25"
+            strokeLinecap="square"
+            className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
       </div>
     </div>
   );
